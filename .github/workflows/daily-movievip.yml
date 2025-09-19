@@ -1,12 +1,22 @@
-name: 🎬 Daily MovieVIP Task
+name: 🎬 Daily MovieVIP Task (8-10点随机)
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 每天UTC时间00:00（即北京时间早上8:00）运行。无需修改！
-  workflow_dispatch: # 允许手动触发
+    - cron: '0 0 * * *' # 每天UTC时间00:00（北京时间08:00）触发，生成随机时间
+  workflow_dispatch:     # 允许手动触发
 
 jobs:
+  generate-schedule:
+    runs-on: ubuntu-latest
+    outputs:
+      random_minute: ${{ steps.set-random.outputs.minute }}
+    steps:
+      - name: Generate random minute between 0 and 120 (8:00-10:00)
+        id: set-random
+        run: echo "minute=$(($RANDOM % 120))" >> $GITHUB_OUTPUT
+
   create-and-run:
+    needs: generate-schedule
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -15,8 +25,15 @@ jobs:
       - name: Setup GitHub CLI
         run: gh auth login --with-token <<< "${{ secrets.GH_API_TOKEN }}"
 
-      - name: Create and Run Codespace
+      - name: Display random execution time
         run: |
-          gh codespace create --repo ${{ github.repository }} --branch main --machine basicLinux32gb --idle-timeout 5m --display-name "Daily Movie Runner" -s
+          hours=$(( ${{ needs.generate-schedule.outputs.random_minute }} / 60 ))
+          minutes=$(( ${{ needs.generate-schedule.outputs.random_minute }} % 60 ))
+          echo "🎲 今天任务将在 8点${{ needs.generate-schedule.outputs.random_minute }}分 (8:00 + ${{ needs.generate-schedule.outputs.random_minute }}分钟) 执行"
+
+      - name: Create and Run Codespace
+        timeout-minutes: 10 # 设置此步骤最长等待10分钟
+        run: |
+          gh codespace create --repo ${{ github.repository }} --branch main --machine basicLinux32gb --idle-timeout 5m --display-name "MovieVIP Runner" -s
         env:
           GH_TOKEN: ${{ secrets.GH_API_TOKEN }}
