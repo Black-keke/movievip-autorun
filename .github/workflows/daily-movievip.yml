@@ -1,0 +1,22 @@
+name: 🎬 Daily MovieVIP Task
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 每天UTC时间00:00（即北京时间早上8:00）运行。无需修改！
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  create-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub CLI
+        run: gh auth login --with-token <<< "${{ secrets.GH_API_TOKEN }}"
+
+      - name: Create and Run Codespace
+        run: |
+          gh codespace create --repo ${{ github.repository }} --branch main --machine basicLinux32gb --idle-timeout 1m --display-name "Daily Movie Runner" -s
+        env:
+          GH_TOKEN: ${{ secrets.GH_API_TOKEN }}
