@@ -17,6 +17,6 @@ jobs:
 
       - name: Create and Run Codespace
         run: |
-          gh codespace create --repo ${{ github.repository }} --branch main --machine basicLinux32gb --idle-timeout 1m --display-name "Daily Movie Runner" -s
+          gh codespace create --repo ${{ github.repository }} --branch main --machine basicLinux32gb --idle-timeout 5m --display-name "Daily Movie Runner" -s
         env:
           GH_TOKEN: ${{ secrets.GH_API_TOKEN }}
