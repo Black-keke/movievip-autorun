@@ -34,6 +34,6 @@ jobs:
       - name: Create and Run Codespace
         timeout-minutes: 10 # 设置此步骤最长等待10分钟
         run: |
-          gh codespace create --repo ${{ github.repository }} --branch main --machine basicLinux32gb --idle-timeout 5m --display-name "MovieVIP Runner" -s
+          gh codespace create --repo ${{ github.repository }} --branch main --machine basicLinux32gb --idle-timeout 5m --display-name "MovieVIP Runner" --wait-for-ready false -s
         env:
           GH_TOKEN: ${{ secrets.GH_API_TOKEN }}
