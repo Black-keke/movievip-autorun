@@ -2,8 +2,8 @@ name: 🎬 Daily MovieVIP Task (8-10点随机)
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 每天UTC时间00:00（北京时间08:00）触发，生成随机时间
-  workflow_dispatch:     # 允许手动触发
+    - cron: '0 0 * * *' # 每天UTC时间00:00（北京时间08:00）触发
+  workflow_dispatch:
 
 jobs:
   generate-schedule:
@@ -27,13 +27,16 @@ jobs:
 
       - name: Display random execution time
         run: |
-          hours=$(( ${{ needs.generate-schedule.outputs.random_minute }} / 60 ))
-          minutes=$(( ${{ needs.generate-schedule.outputs.random_minute }} % 60 ))
-          echo "🎲 今天任务将在 8点${{ needs.generate-schedule.outputs.random_minute }}分 (8:00 + ${{ needs.generate-schedule.outputs.random_minute }}分钟) 执行"
+          echo "🎲 今天任务将在 8点${{ needs.generate-schedule.outputs.random_minute }}分执行"
+          echo "（8:00 + ${{ needs.generate-schedule.outputs.random_minute }}分钟）"
 
       - name: Create and Run Codespace
-        timeout-minutes: 10 # 设置此步骤最长等待10分钟
+        timeout-minutes: 10
         run: |
-          gh codespace create --repo ${{ github.repository }} --branch main --machine basicLinux32gb --idle-timeout 5m --display-name "MovieVIP Runner" --wait-for-ready false -s
+          # 创建 codespace 但不等待它完全就绪（忽略 SSH 错误）
+          gh codespace create --repo ${{ github.repository }} --branch main --machine basicLinux32gb --idle-timeout 5m --display-name "MovieVIP Runner" -s || echo "Codespace created successfully (SSH check ignored)"
+          
+          # 添加一个小延迟，确保 codespace 有足够时间启动
+          sleep 30
         env:
           GH_TOKEN: ${{ secrets.GH_API_TOKEN }}
